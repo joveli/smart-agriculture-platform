@@ -3,11 +3,35 @@
 Smart Agriculture Platform - FastAPI Application
 """
 
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app.core.config import settings
+from app.core.database import engine, Base
+from app.core.redis import init_redis, close_redis
+from app.core.rabbitmq import init_rabbitmq, close_rabbitmq
 from app.api.v1 import auth, tenants, farms, greenhouses, devices, crops, alerts
+from app.api.v1.admin import admin
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """应用生命周期管理"""
+    # 启动时
+    await init_redis()
+    await init_rabbitmq()
+    # 创建数据库表（Alembic 迁移前临时方案）
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    print("✅ Application started")
+    yield
+    # 关闭时
+    await close_redis()
+    await close_rabbitmq()
+    print("👋 Application shutdown")
+
 
 app = FastAPI(
     title="智慧农业平台 API",
@@ -15,9 +39,10 @@ app = FastAPI(
     version="0.1.0",
     docs_url="/docs",
     redoc_url="/redoc",
+    lifespan=lifespan,
 )
 
-# CORS 配置
+# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
@@ -34,6 +59,7 @@ app.include_router(greenhouses.router, prefix="/api/v1/greenhouses", tags=["温�
 app.include_router(devices.router, prefix="/api/v1/devices", tags=["设备管理"])
 app.include_router(crops.router, prefix="/api/v1/crops", tags=["作物管理"])
 app.include_router(alerts.router, prefix="/api/v1/alerts", tags=["告警管理"])
+app.include_router(admin.router, prefix="/api/v1/admin", tags=["超级管理员"])
 
 
 @app.get("/")
@@ -44,3 +70,11 @@ async def root():
 @app.get("/health")
 async def health_check():
     return {"status": "healthy"}
+
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request, exc):
+    return JSONResponse(
+        status_code=500,
+        content={"detail": str(exc) if settings.DEBUG else "Internal server error"},
+    )

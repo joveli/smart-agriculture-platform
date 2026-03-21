@@ -1,6 +1,7 @@
 version: '3.8'
 
 services:
+  # === PostgreSQL + TimescaleDB ===
   postgres:
     image: timescale/timescaledb:latest-pg15
     container_name: smart_agri_postgres
@@ -18,6 +19,7 @@ services:
       timeout: 5s
       retries: 5
 
+  # === Redis ===
   redis:
     image: redis:7-alpine
     container_name: smart_agri_redis
@@ -31,6 +33,7 @@ services:
       timeout: 5s
       retries: 5
 
+  # === RabbitMQ ===
   rabbitmq:
     image: rabbitmq:3-management-alpine
     container_name: smart_agri_rabbitmq
@@ -39,7 +42,7 @@ services:
       RABBITMQ_DEFAULT_PASS: smartagri_secret
     ports:
       - "5672:5672"
-      - "15672:15672"  # Management UI
+      - "15672:15672"
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     healthcheck:
@@ -48,7 +51,52 @@ services:
       timeout: 5s
       retries: 5
 
+  # === EMQX MQTT Broker ===
+  emqx:
+    image: emqx/emqx:5.8
+    container_name: smart_agri_emqx
+    ports:
+      - "1883:1883"    # MQTT
+      - "8083:8083"    # WebSocket
+      - "8084:8084"    # MQTT over WebSocket
+      - "18083:18083"  # Dashboard
+    environment:
+      EMQX_NAME: emqx
+      EMQX_HOST: 127.0.0.1
+      EMQX_DASHBOARD__DEFAULT_USERNAME: admin
+      EMQX_DASHBOARD__DEFAULT_PASSWORD: public
+    volumes:
+      - emqx_data:/opt/emqx/data
+      - emqx_log:/opt/emqx/log
+    healthcheck:
+      test: ["CMD", "emqx", "ctl", "status"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # === MinIO Object Storage ===
+  minio:
+    image: minio/minio:latest
+    container_name: smart_agri_minio
+    ports:
+      - "9000:9000"    # API
+      - "9001:9001"    # Console
+    environment:
+      MINIO_ROOT_USER: smartagri
+      MINIO_ROOT_PASSWORD: smartagri_secret
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 30s
+      timeout: 20s
+      retries: 5
+
 volumes:
   postgres_data:
   redis_data:
   rabbitmq_data:
+  emqx_data:
+  emqx_log:
+  minio_data:
