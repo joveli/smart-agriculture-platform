@@ -122,3 +122,41 @@ async def delete_tenant(
     tenant.deleted_at = datetime.now(timezone.utc)
     await db.commit()
     return {"message": "Tenant deleted"}
+
+
+@router.patch("/{tenant_id}/approve", response_model=TenantResponse)
+async def approve_tenant(
+    tenant_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("platform_admin")),
+):
+    """审核通过租户（仅平台管理员）"""
+    result = await db.execute(select(Tenant).where(Tenant.id == tenant_id))
+    tenant = result.scalar_one_or_none()
+    if not tenant:
+        raise HTTPException(status_code=404, detail="Tenant not found")
+    if tenant.status == TenantStatus.DELETED.value:
+        raise HTTPException(status_code=400, detail="已删除的租户无法审核")
+    tenant.status = TenantStatus.ACTIVE.value
+    await db.commit()
+    await db.refresh(tenant)
+    return tenant_to_response(tenant)
+
+
+@router.patch("/{tenant_id}/suspend", response_model=TenantResponse)
+async def suspend_tenant(
+    tenant_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("platform_admin")),
+):
+    """暂停租户（仅平台管理员）"""
+    result = await db.execute(select(Tenant).where(Tenant.id == tenant_id))
+    tenant = result.scalar_one_or_none()
+    if not tenant:
+        raise HTTPException(status_code=404, detail="Tenant not found")
+    if tenant.status == TenantStatus.DELETED.value:
+        raise HTTPException(status_code=400, detail="已删除的租户无法暂停")
+    tenant.status = TenantStatus.SUSPENDED.value
+    await db.commit()
+    await db.refresh(tenant)
+    return tenant_to_response(tenant)
