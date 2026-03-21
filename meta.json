@@ -1,0 +1,14 @@
+{
+  "project_id": "smart-agriculture-platform",
+  "title": "智慧农业平台",
+  "project_room_id": "!LuNMnG9KAxotc3dmMw:matrix-local.hiclaw.io:18080",
+  "status": "active",
+  "workers": [
+    "product-manager",
+    "architect",
+    "fullstack-dev"
+  ],
+  "created_at": "2026-03-21T14:35:17Z",
+  "confirmed_at": "2026-03-21T14:38:00Z",
+  "repository": "https://github.com/joveli/smart-agriculture-platform"
+}
