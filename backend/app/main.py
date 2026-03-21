@@ -14,6 +14,7 @@ from app.core.redis import init_redis, close_redis
 from app.core.rabbitmq import init_rabbitmq, close_rabbitmq
 from app.api.v1 import auth, tenants, farms, greenhouses, devices, crops, alerts
 from app.api.v1.admin import admin
+from app.api.v1.agent import router as agent_router
 
 
 @asynccontextmanager
@@ -60,6 +61,7 @@ app.include_router(devices.router, prefix="/api/v1/devices", tags=["设备管理
 app.include_router(crops.router, prefix="/api/v1/crops", tags=["作物管理"])
 app.include_router(alerts.router, prefix="/api/v1/alerts", tags=["告警管理"])
 app.include_router(admin.router, prefix="/api/v1/admin", tags=["超级管理员"])
+app.include_router(agent_router, prefix="/api/v1/agent", tags=["LLM智能体"])
 
 
 @app.get("/")
