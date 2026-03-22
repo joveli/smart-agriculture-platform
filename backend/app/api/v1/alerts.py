@@ -173,7 +173,7 @@ async def resolve_alert(
     if not alert:
         raise HTTPException(status_code=404, detail="Alert not found")
     alert.status = "resolved"
-    alert.resolved_at = datetime.now(timezone.utc)
+    alert.resolved_at = datetime.utcnow()
     alert.resolved_by = current_user.id
     await db.commit()
     return {"alert_id": str(alert_id), "status": "resolved"}

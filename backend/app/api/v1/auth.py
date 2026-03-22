@@ -122,7 +122,7 @@ async def login(
             )
 
     # 更新最后登录时间
-    user.last_login_at = datetime.now(timezone.utc)
+    user.last_login_at = datetime.utcnow()
     await db.commit()
 
     # 生成 JWT

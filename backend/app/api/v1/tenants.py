@@ -119,7 +119,7 @@ async def delete_tenant(
 
     tenant.status = TenantStatus.DELETED.value
     from datetime import datetime, timezone
-    tenant.deleted_at = datetime.now(timezone.utc)
+    tenant.deleted_at = datetime.utcnow()
     await db.commit()
     return {"message": "Tenant deleted"}
 

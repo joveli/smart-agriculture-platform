@@ -24,6 +24,8 @@ AsyncSessionLocal = async_sessionmaker(
     autocommit=False,
     autoflush=False,
 )
+# 别名，兼容旧代码
+async_session_maker = AsyncSessionLocal
 
 # ORM 基类
 Base = declarative_base()
