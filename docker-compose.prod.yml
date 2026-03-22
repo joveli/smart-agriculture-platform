@@ -1,0 +1,171 @@
+# Smart Agriculture Platform - Production Docker Compose
+# Usage: docker-compose -f docker-compose.prod.yml up -d
+
+version: '3.8'
+
+services:
+  # === Database ===
+  postgres:
+    image: timescale/timescaledb:latest-pg15
+    container_name: smart_agri_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-smartagri}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-smartagri_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-smart_agriculture}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - smart_agri_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-smartagri}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # === Redis ===
+  redis:
+    image: redis:7-alpine
+    container_name: smart_agri_redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - smart_agri_net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # === RabbitMQ ===
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: smart_agri_rabbitmq
+    restart: always
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-smartagri}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-smartagri_secret}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - smart_agri_net
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # === EMQX MQTT Broker ===
+  emqx:
+    image: emqx/emqx:5.8
+    container_name: smart_agri_emqx
+    restart: always
+    ports:
+      - "1883:1883"    # MQTT
+      - "8083:8083"    # WebSocket
+      - "8084:8084"    # MQTT over WebSocket
+      - "18083:18083"  # Dashboard
+    environment:
+      EMQX_NAME: emqx
+      EMQX_HOST: 0.0.0.0
+      EMQX_DASHBOARD__DEFAULT_USERNAME: ${EMQX_ADMIN:-admin}
+      EMQX_DASHBOARD__DEFAULT_PASSWORD: ${EMQX_PASSWORD:-public}
+    volumes:
+      - emqx_data:/opt/emqx/data
+      - emqx_log:/opt/emqx/log
+    networks:
+      - smart_agri_net
+    healthcheck:
+      test: ["CMD", "emqx", "ctl", "status"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # === MinIO Object Storage ===
+  minio:
+    image: minio/minio:latest
+    container_name: smart_agri_minio
+    restart: always
+    ports:
+      - "9000:9000"    # API
+      - "9001:9001"    # Console
+    environment:
+      MINIO_ROOT_USER: ${MINIO_USER:-smartagri}
+      MINIO_ROOT_PASSWORD: ${MINIO_PASSWORD:-smartagri_secret}
+    volumes:
+      - minio_data:/data
+    networks:
+      - smart_agri_net
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 30s
+      timeout: 20s
+      retries: 5
+
+  # === FastAPI Backend ===
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: smart_agri_backend
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-smartagri}:${POSTGRES_PASSWORD:-smartagri_secret}@postgres:5432/${POSTGRES_DB:-smart_agriculture}
+      REDIS_URL: redis://redis:6379/0
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-smartagri}:${RABBITMQ_PASSWORD:-smartagri_secret}@rabbitmq:5672/
+      SECRET_KEY: ${SECRET_KEY:-change-me-in-production}
+      MQTT_BROKER_URL: mqtt://${EMQX_ADMIN:-admin}:${EMQX_PASSWORD:-public}@emqx:1883
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      emqx:
+        condition: service_healthy
+    networks:
+      - smart_agri_net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # === Frontend (Nginx) ===
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: smart_agri_frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - smart_agri_net
+
+networks:
+  smart_agri_net:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+  rabbitmq_data:
+  emqx_data:
+  emqx_log:
+  minio_data:
