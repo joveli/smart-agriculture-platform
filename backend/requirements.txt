@@ -17,3 +17,4 @@ python-dotenv==1.0.1
 alembic==1.13.1
 timescale-python==0.1.0
 minimax-python==0.1.0
+paho-mqtt==1.6.2
