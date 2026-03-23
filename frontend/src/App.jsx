@@ -13,6 +13,8 @@ import GreenhouseList from './pages/GreenhouseList'
 import GreenhouseDetail from './pages/GreenhouseDetail'
 import DeviceList from './pages/DeviceList'
 import AlertList from './pages/AlertList'
+import ContractList from './pages/ContractList'
+import PaymentList from './pages/PaymentList'
 import useAuthStore from './stores/authStore'
 
 // 受保护的路由包装器
@@ -42,6 +44,8 @@ function App() {
         <Route path="greenhouses/:id" element={<GreenhouseDetail />} />
         <Route path="devices" element={<DeviceList />} />
         <Route path="alerts" element={<AlertList />} />
+        <Route path="contracts" element={<ContractList />} />
+        <Route path="payments" element={<PaymentList />} />
       </Route>
     </Routes>
   )

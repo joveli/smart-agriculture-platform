@@ -12,6 +12,8 @@ import {
   ExperimentOutlined,
   AppstoreOutlined,
   AlertOutlined,
+  FileTextOutlined,
+  DollarOutlined,
   LogoutOutlined,
   UserOutlined,
 } from '@ant-design/icons'
@@ -27,6 +29,8 @@ const menuItems = [
   { key: '/greenhouses', icon: <ExperimentOutlined />, label: '温室管理' },
   { key: '/devices', icon: <AppstoreOutlined />, label: '设备管理' },
   { key: '/alerts', icon: <AlertOutlined />, label: '告警管理' },
+  { key: '/contracts', icon: <FileTextOutlined />, label: '合同管理' },
+  { key: '/payments', icon: <DollarOutlined />, label: '支付管理' },
 ]
 
 function BasicLayout() {
