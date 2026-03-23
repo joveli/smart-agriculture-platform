@@ -26,6 +26,7 @@ class Farm(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     greenhouses = relationship("Greenhouse", back_populates="farm", lazy="selectin")
+    tenant = relationship("Tenant", back_populates="farms")
 
     def __repr__(self):
         return f"<Farm {self.name} ({self.id})>"

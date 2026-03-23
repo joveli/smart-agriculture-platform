@@ -13,7 +13,7 @@ from app.core.database import engine, Base
 from app.core.redis import init_redis, close_redis
 from app.core.rabbitmq import init_rabbitmq, close_rabbitmq
 from app.core.mqtt_client import init_mqtt, close_mqtt
-from app.api.v1 import auth, tenants, farms, greenhouses, devices, crops, alerts
+from app.api.v1 import auth, tenants, farms, greenhouses, devices, crops, alerts, contracts, payments
 from app.api.v1.admin import admin
 from app.api.v1.agent import router as agent_router
 from app.api.v1.ws import router as ws_router
@@ -87,6 +87,8 @@ app.include_router(alerts.router, prefix="/api/v1/alerts", tags=["告警管理"]
 app.include_router(admin.router, prefix="/api/v1/admin", tags=["超级管理员"])
 app.include_router(agent_router, prefix="/api/v1/agent", tags=["LLM智能体"])
 app.include_router(ws_router, prefix="/api/v1/ws", tags=["WebSocket"])
+app.include_router(contracts.router, prefix="/api/v1/contracts", tags=["合同管理"])
+app.include_router(payments.router, prefix="/api/v1/payments", tags=["支付管理"])
 
 
 @app.get("/")

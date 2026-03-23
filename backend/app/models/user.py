@@ -35,7 +35,7 @@ class User(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     last_login_at = Column(DateTime, nullable=True)
 
-    tenant = relationship("Tenant", backref="users", lazy="selectin")
+    tenant = relationship("Tenant", back_populates="users", lazy="selectin")
 
     def __repr__(self):
         return f"<User {self.username} ({self.role})>"

@@ -49,6 +49,7 @@ class Device(Base):
 
     greenhouse = relationship("Greenhouse", back_populates="devices")
     sensor_readings = relationship("SensorReading", back_populates="device", lazy="selectin")
+    tenant = relationship("Tenant", back_populates="devices")
 
     def __repr__(self):
         return f"<Device {self.name} ({self.device_type})>"

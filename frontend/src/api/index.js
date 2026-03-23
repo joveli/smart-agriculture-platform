@@ -114,3 +114,21 @@ export const adminApi = {
   auditLogs: (params) => api.get('/api/v1/admin/audit-logs', { params }),
   tenantStats: () => api.get('/api/v1/admin/tenants/stats'),
 }
+
+// ============ Contract API ============
+export const contractApi = {
+  list: (params) => api.get('/api/v1/contracts/', { params }),
+  get: (id) => api.get(`/api/v1/contracts/${id}`),
+  create: (data) => api.post('/api/v1/contracts/', data),
+  update: (id, data) => api.patch(`/api/v1/contracts/${id}`, data),
+  delete: (id) => api.delete(`/api/v1/contracts/${id}`),
+};
+
+// ============ Payment API ============
+export const paymentApi = {
+  list: (params) => api.get('/api/v1/payments/', { params }),
+  get: (id) => api.get(`/api/v1/payments/${id}`),
+  create: (data) => api.post('/api/v1/payments/', data),
+  complete: (id) => api.post(`/api/v1/payments/${id}/complete`),
+  stats: () => api.get('/api/v1/payments/stats'),
+};
