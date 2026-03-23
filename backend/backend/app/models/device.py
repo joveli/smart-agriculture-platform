@@ -48,7 +48,6 @@ class Device(Base):
     last_seen_at = Column(DateTime, nullable=True)
 
     greenhouse = relationship("Greenhouse", back_populates="devices")
-    sensor_readings = relationship("SensorReading", back_populates="device", lazy="selectin")
 
     def __repr__(self):
         return f"<Device {self.name} ({self.device_type})>"

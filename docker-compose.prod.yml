@@ -113,9 +113,6 @@ services:
 
   # === FastAPI Backend ===
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
     container_name: smart_agri_backend
     restart: always
     ports:

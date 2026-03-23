@@ -24,10 +24,10 @@ AsyncSessionLocal = async_sessionmaker(
     autocommit=False,
     autoflush=False,
 )
-
-# ORM 基类
 # 别名，兼容旧代码
 async_session_maker = AsyncSessionLocal
+
+# ORM 基类
 Base = declarative_base()
 
 # 依赖注入：获取数据库会话

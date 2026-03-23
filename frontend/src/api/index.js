@@ -54,7 +54,7 @@ export default api
 // ============ Auth API ============
 export const authApi = {
   login: (username, password) =>
-    api.post('/api/v1/auth/login', { username, password }),
+    api.post('/api/v1/auth/login', new URLSearchParams({ username, password }), { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }),
   register: (data) =>
     api.post('/api/v1/auth/register', data),
   getMe: () =>

@@ -6,7 +6,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Card, Row, Col, Statistic, Button, Spin, Descriptions, Tag } from 'antd'
-import { ArrowLeftOutlined, ThermometerOutlined, DropletOutlined, ThunderboltOutlined } from '@ant-design/icons'
+import { ArrowLeftOutlined, ApiOutlined, CloudOutlined, ThunderboltOutlined } from '@ant-design/icons'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 import { greenhouseApi } from '../api'
 
@@ -84,7 +84,7 @@ function GreenhouseDetail() {
               title="温度"
               value={latest.temperature || '-'}
               suffix="°C"
-              prefix={<ThermometerOutlined />}
+              prefix={<ApiOutlined />}
               valueStyle={{ color: latest.temperature > 30 ? '#cf1322' : '#3f8600' }}
             />
           </Card>
@@ -95,7 +95,7 @@ function GreenhouseDetail() {
               title="湿度"
               value={latest.humidity || '-'}
               suffix="%"
-              prefix={<DropletOutlined />}
+              prefix={<CloudOutlined />}
               valueStyle={{ color: '#1890ff' }}
             />
           </Card>

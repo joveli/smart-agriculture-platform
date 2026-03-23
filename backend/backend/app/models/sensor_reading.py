@@ -6,7 +6,6 @@ Sensor Readings - TimescaleDB Hypertable
 import uuid
 from datetime import datetime
 from sqlalchemy import Column, String, DateTime, ForeignKey, Numeric, Index
-from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
 from app.core.database import Base
 
@@ -35,10 +34,6 @@ class SensorReading(Base):
     soil_humidity = Column(Numeric(8, 3), nullable=True)      # %
     soil_ec = Column(Numeric(10, 4), nullable=True)           # mS/cm
     
-    # Relationships
-    greenhouse = relationship("Greenhouse", back_populates="sensor_readings", lazy="selectin")
-    device = relationship("Device", back_populates="sensor_readings", lazy="selectin")
-
     # 元数据
     raw_payload = Column(String(1000), nullable=True)  # 原始 MQTT payload
 

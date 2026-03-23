@@ -1,0 +1,5 @@
+version: '3.8'
+services:
+  backend:
+    image: smart-agriculture-backend:latest
+    pull_policy: never
